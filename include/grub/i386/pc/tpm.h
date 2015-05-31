@@ -45,15 +45,6 @@
 
 #define TPM_TAG_RQU_COMMAND 0x00C1
 
-typedef struct {
-	grub_uint32_t out_eax, out_ebx, out_ecx, out_edx, out_esi, out_edi;
-} __attribute__ ((packed)) StatusCheckArgs;
-
-typedef struct {
-	grub_uint32_t out_eax;
-	grub_uint32_t in_ebx, in_ecx, in_edx, in_esi, in_edi, in_es, in_ds;
-} __attribute__ ((packed)) PassThroughToTPMArgs;
-
 /* TCG_PassThroughToTPM Input Parameter Block */
 typedef struct {
 	grub_uint16_t IPBLength;
@@ -70,11 +61,6 @@ typedef struct {
 	grub_uint8_t TPMOperandOut[1];
 } __attribute__ ((packed)) PassThroughToTPM_OutputParamBlock;
 
-typedef struct {
-	grub_uint32_t out_eax;
-	grub_uint32_t in_ebx, in_ecx, in_edx, in_edi, in_es;
-} __attribute__ ((packed)) SetMemoryOverwriteRequestBitArgs;
-
 /* print SHA1 hash of input */
 void EXPORT_FUNC(print_sha1) ( grub_uint8_t *inDigest );
 
@@ -83,13 +69,6 @@ grub_uint16_t EXPORT_FUNC(swap16) ( grub_uint16_t value );
 
 /* 32 bit big to little-endian conversion */
 grub_uint32_t EXPORT_FUNC(swap32) ( grub_uint32_t value );
-
-/* 	Checks for TPM availability
-
-  	Returns 1 if available
-	Returns 0 if not
-*/
-grub_uint32_t EXPORT_FUNC(grub_TPM_isAvailable) ( void );
 
 /* 	Measure string */
 void EXPORT_FUNC(grub_TPM_measureString) ( const char *string );
@@ -100,18 +79,13 @@ void EXPORT_FUNC(grub_TPM_measureBuffer) ( const void* buffer, grub_uint32_t buf
 
 void grub_TPM_unseal( const grub_uint8_t* sealedBuffer, const grub_size_t inputSize, grub_uint8_t** result, grub_size_t* resultSize );
 
-/* Invokes assembler function asm_tcg_statusCheck() */
+/* Invokes TCG_StatusCheck Int1A interrupt */
 grub_err_t EXPORT_FUNC(tcg_statusCheck)( grub_uint32_t *returnCode, grub_uint8_t *major, grub_uint8_t *minor,
 		grub_uint32_t *featureFlags, grub_uint32_t *eventLog, grub_uint32_t *edi );
 
 /* pass commands to TPM */
 void EXPORT_FUNC(tcg_passThroughToTPM) ( const PassThroughToTPM_InputParamBlock* input,
 		PassThroughToTPM_OutputParamBlock* output );
-
-/* Assembler exports: */
-grub_uint32_t EXPORT_FUNC(asm_tcg_statusCheck) (StatusCheckArgs* args);
-grub_uint32_t EXPORT_FUNC(asm_tcg_passThroughToTPM) (PassThroughToTPMArgs* args);
-grub_uint32_t EXPORT_FUNC(asm_tcg_SetMemoryOverwriteRequestBit) (SetMemoryOverwriteRequestBitArgs* args);
 
 #endif
 /* End TCG Extension */
